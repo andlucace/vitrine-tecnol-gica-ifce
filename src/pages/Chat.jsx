@@ -101,11 +101,10 @@ Inclua no máximo 5 patentes mais relevantes.`,
         properties: {
           response_text: { type: 'string' },
           patent_ids: { type: 'array', items: { type: 'string' } },
-          relevance_scores: { type: 'object', additionalProperties: { type: 'number' } },
           classified_area: { type: 'string' },
           no_results: { type: 'boolean' },
         },
-        required: ['response_text', 'patent_ids', 'relevance_scores', 'classified_area', 'no_results'],
+        required: ['response_text', 'patent_ids', 'classified_area', 'no_results'],
       },
     });
 
@@ -114,7 +113,7 @@ Inclua no máximo 5 patentes mais relevantes.`,
       .map(id => {
         const p = patents.find(p => p.id === id);
         if (!p) return null;
-        return { ...p, _score: aiResponse.relevance_scores?.[id] || 0 };
+        return { ...p, _score: 0 };
       })
       .filter(Boolean)
       .sort((a, b) => (b._score || 0) - (a._score || 0));
