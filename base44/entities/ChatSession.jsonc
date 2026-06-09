@@ -1,0 +1,36 @@
+{
+  "name": "ChatSession",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "ID \u00fanico da sess\u00e3o de chat"
+    },
+    "query": {
+      "type": "string",
+      "description": "\u00daltima consulta/pergunta realizada"
+    },
+    "classified_area": {
+      "type": "string",
+      "description": "\u00c1rea tecnol\u00f3gica classificada pela IA"
+    },
+    "patents_shown": {
+      "type": "array",
+      "description": "IDs das patentes exibidas nesta sess\u00e3o",
+      "items": {
+        "type": "string"
+      }
+    },
+    "led_to_interest": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o usu\u00e1rio demonstrou interesse em alguma patente"
+    },
+    "total_messages": {
+      "type": "number",
+      "default": 1,
+      "description": "Total de mensagens na sess\u00e3o"
+    }
+  },
+  "required": []
+}

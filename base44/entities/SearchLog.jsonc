@@ -1,0 +1,35 @@
+{
+  "name": "SearchLog",
+  "type": "object",
+  "properties": {
+    "query_text": {
+      "type": "string",
+      "description": "Texto da consulta realizada"
+    },
+    "classified_area": {
+      "type": "string",
+      "description": "\u00c1rea tecnol\u00f3gica classificada pela IA"
+    },
+    "patents_returned": {
+      "type": "array",
+      "description": "IDs das patentes retornadas",
+      "items": {
+        "type": "string"
+      }
+    },
+    "result_count": {
+      "type": "number",
+      "description": "N\u00famero de patentes retornadas"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o de chat"
+    },
+    "led_to_interest": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a busca levou a um cadastro de interesse"
+    }
+  },
+  "required": []
+}

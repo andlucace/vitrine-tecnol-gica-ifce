@@ -1,0 +1,96 @@
+{
+  "name": "Patent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo da patente"
+    },
+    "patent_number": {
+      "type": "string",
+      "description": "N\u00famero de registro da patente (ex: BR1020230000001)"
+    },
+    "tech_area": {
+      "type": "string",
+      "description": "\u00c1rea tecnol\u00f3gica",
+      "enum": [
+        "Agroind\u00fastria",
+        "TIC",
+        "Sa\u00fade",
+        "Constru\u00e7\u00e3o Civil",
+        "Energias Renov\u00e1veis",
+        "Meio Ambiente",
+        "Biotecnologia",
+        "Alimentos",
+        "Qu\u00edmica",
+        "Eletroeletr\u00f4nica",
+        "Mec\u00e2nica",
+        "Outras"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada da patente e sua aplica\u00e7\u00e3o"
+    },
+    "inventors": {
+      "type": "string",
+      "description": "Nome dos inventores separados por v\u00edrgula"
+    },
+    "campus": {
+      "type": "string",
+      "description": "Campus do IFCE respons\u00e1vel"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Depositada",
+        "Em an\u00e1lise",
+        "Concedida",
+        "Licenciada",
+        "Dispon\u00edvel para licenciamento"
+      ],
+      "default": "Dispon\u00edvel para licenciamento"
+    },
+    "filing_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de dep\u00f3sito"
+    },
+    "keywords": {
+      "type": "string",
+      "description": "Palavras-chave separadas por v\u00edrgula para busca sem\u00e2ntica"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL do arquivo PDF ou Word da patente"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Nome original do arquivo"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL de imagem representativa da patente"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Exibir em destaque na p\u00e1gina inicial"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Patente ativa/vis\u00edvel no sistema"
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de visualiza\u00e7\u00f5es"
+    }
+  },
+  "required": [
+    "title",
+    "tech_area",
+    "description"
+  ]
+}

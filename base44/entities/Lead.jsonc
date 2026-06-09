@@ -1,0 +1,59 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "cnpj": {
+      "type": "string",
+      "description": "CNPJ da empresa"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Raz\u00e3o social da empresa"
+    },
+    "responsible_name": {
+      "type": "string",
+      "description": "Nome do respons\u00e1vel"
+    },
+    "email": {
+      "type": "string",
+      "description": "E-mail de contato"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefone de contato"
+    },
+    "patent_id": {
+      "type": "string",
+      "description": "ID da patente de interesse"
+    },
+    "patent_title": {
+      "type": "string",
+      "description": "T\u00edtulo da patente de interesse (cache)"
+    },
+    "tech_area": {
+      "type": "string",
+      "description": "\u00c1rea tecnol\u00f3gica da patente de interesse"
+    },
+    "message": {
+      "type": "string",
+      "description": "Mensagem ou interesse espec\u00edfico descrito pelo usu\u00e1rio"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Novo",
+        "Em contato",
+        "Negociando",
+        "Fechado",
+        "Descartado"
+      ],
+      "default": "Novo"
+    }
+  },
+  "required": [
+    "company_name",
+    "responsible_name",
+    "email",
+    "phone"
+  ]
+}
