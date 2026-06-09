@@ -101,10 +101,11 @@ Inclua no máximo 5 patentes mais relevantes.`,
         properties: {
           response_text: { type: 'string' },
           patent_ids: { type: 'array', items: { type: 'string' } },
-          relevance_scores: { type: 'object' },
+          relevance_scores: { type: 'object', additionalProperties: { type: 'number' } },
           classified_area: { type: 'string' },
           no_results: { type: 'boolean' },
         },
+        required: ['response_text', 'patent_ids', 'relevance_scores', 'classified_area', 'no_results'],
       },
     });
 
