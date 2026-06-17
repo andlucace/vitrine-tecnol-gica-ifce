@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { 
   Plus, Search, Edit2, Trash2, Upload, FileText, 
-  Eye, EyeOff, Star, StarOff, Filter, X
+  Eye, EyeOff, Star, StarOff, Filter, X, Download
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -30,6 +30,10 @@ export default function Patents() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showInpiModal, setShowInpiModal] = useState(false);
+  const [inpiForm, setInpiForm] = useState({ cnpj: '', cpf: '' });
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -39,6 +43,30 @@ export default function Patents() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleInpiImport = async (e) => {
+    e.preventDefault();
+    if (!inpiForm.cnpj && !inpiForm.cpf) {
+      toast({ title: 'Informe um CNPJ ou CPF para consulta', variant: 'destructive' });
+      return;
+    }
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const response = await base44.functions.invoke('importInpiPatents', {
+        cnpj: inpiForm.cnpj || undefined,
+        cpf: inpiForm.cpf || undefined,
+      });
+      setImportResult(response.data);
+      if (response.data.imported > 0) {
+        toast({ title: `${response.data.imported} patente(s) importada(s) com sucesso!` });
+        load();
+      }
+    } catch (err) {
+      toast({ title: err.response?.data?.error || 'Erro ao importar patentes', variant: 'destructive' });
+    }
+    setImporting(false);
+  };
 
   const openCreate = () => { setEditingPatent(null); setForm(EMPTY_FORM); setShowModal(true); };
   const openEdit = (p) => { setEditingPatent(p); setForm({ ...EMPTY_FORM, ...p }); setShowModal(true); };
@@ -99,9 +127,14 @@ export default function Patents() {
           <h1 className="text-2xl font-bold">Gerenciar Patentes</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{patents.length} patente(s) cadastrada(s)</p>
         </div>
-        <Button onClick={openCreate} className="bg-primary hover:bg-primary/90 text-white gap-2 shrink-0">
-          <Plus className="w-4 h-4" /> Nova Patente
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => { setShowInpiModal(true); setImportResult(null); setInpiForm({ cnpj: '', cpf: '' }); }} variant="outline" className="gap-2 shrink-0">
+            <Download className="w-4 h-4" /> Importar do INPI
+          </Button>
+          <Button onClick={openCreate} className="bg-primary hover:bg-primary/90 text-white gap-2 shrink-0">
+            <Plus className="w-4 h-4" /> Nova Patente
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -278,6 +311,56 @@ export default function Patents() {
               <Button type="button" variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancelar</Button>
               <Button type="submit" disabled={saving} className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold">
                 {saving ? 'Salvando...' : (editingPatent ? 'Atualizar' : 'Cadastrar')}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* INPI Import Modal */}
+      <Dialog open={showInpiModal} onOpenChange={setShowInpiModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Importar Patentes do INPI</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Consulte patentes registradas no INPI por CNPJ ou CPF do titular. As patentes encontradas serão importadas para a base do sistema.
+          </p>
+          <form onSubmit={handleInpiImport} className="space-y-4 mt-2">
+            <div>
+              <Label className="text-xs font-semibold">CNPJ do titular</Label>
+              <Input
+                value={inpiForm.cnpj}
+                onChange={e => setInpiForm(p => ({ ...p, cnpj: e.target.value }))}
+                placeholder="00.000.000/0000-00"
+                className="mt-1.5"
+                disabled={importing}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">CPF do titular</Label>
+              <Input
+                value={inpiForm.cpf}
+                onChange={e => setInpiForm(p => ({ ...p, cpf: e.target.value }))}
+                placeholder="000.000.000-00"
+                className="mt-1.5"
+                disabled={importing}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Preencha ao menos um dos campos acima.</p>
+
+            {importResult && (
+              <div className={`rounded-lg p-3 text-sm ${importResult.error ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                {importResult.error || importResult.message}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setShowInpiModal(false)} className="flex-1" disabled={importing}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={importing} className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold">
+                {importing ? 'Consultando INPI...' : 'Consultar e Importar'}
               </Button>
             </div>
           </form>
