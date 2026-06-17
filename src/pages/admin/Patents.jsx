@@ -47,7 +47,9 @@ export default function Patents() {
   const handleInpiImport = async (e) => {
     e.preventDefault();
     if (!inpiForm.cnpj && !inpiForm.cpf) {
-      toast({ title: 'Informe um CNPJ ou CPF para consulta', variant: 'destructive' });
+      const err = { error: true, message: 'Informe um CNPJ ou CPF para consulta' };
+      setImportResult(err);
+      setTimeout(() => setImportResult(null), 3000);
       return;
     }
     setImporting(true);
@@ -63,7 +65,9 @@ export default function Patents() {
         load();
       }
     } catch (err) {
-      toast({ title: err.response?.data?.error || 'Erro ao importar patentes', variant: 'destructive' });
+      const errorData = { error: true, message: err.response?.data?.error || 'Erro ao importar patentes' };
+      setImportResult(errorData);
+      setTimeout(() => setImportResult(null), 3000);
     }
     setImporting(false);
   };
@@ -319,7 +323,7 @@ export default function Patents() {
 
       {/* INPI Import Modal */}
       <Dialog open={showInpiModal} onOpenChange={setShowInpiModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Importar Patentes do INPI</DialogTitle>
           </DialogHeader>
@@ -327,40 +331,92 @@ export default function Patents() {
             Consulte patentes registradas no INPI por CNPJ ou CPF do titular. As patentes encontradas serão importadas para a base do sistema.
           </p>
           <form onSubmit={handleInpiImport} className="space-y-4 mt-2">
-            <div>
-              <Label className="text-xs font-semibold">CNPJ do titular</Label>
-              <Input
-                value={inpiForm.cnpj}
-                onChange={e => setInpiForm(p => ({ ...p, cnpj: e.target.value }))}
-                placeholder="00.000.000/0000-00"
-                className="mt-1.5"
-                disabled={importing}
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">CPF do titular</Label>
-              <Input
-                value={inpiForm.cpf}
-                onChange={e => setInpiForm(p => ({ ...p, cpf: e.target.value }))}
-                placeholder="000.000.000-00"
-                className="mt-1.5"
-                disabled={importing}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs font-semibold">CNPJ do titular</Label>
+                <Input
+                  value={inpiForm.cnpj}
+                  onChange={e => setInpiForm(p => ({ ...p, cnpj: e.target.value }))}
+                  placeholder="00.000.000/0000-00"
+                  className="mt-1.5"
+                  disabled={importing}
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-semibold">CPF do titular</Label>
+                <Input
+                  value={inpiForm.cpf}
+                  onChange={e => setInpiForm(p => ({ ...p, cpf: e.target.value }))}
+                  placeholder="000.000.000-00"
+                  className="mt-1.5"
+                  disabled={importing}
+                />
+              </div>
             </div>
             <p className="text-xs text-muted-foreground">Preencha ao menos um dos campos acima.</p>
 
-            {importResult && (
-              <div className={`rounded-lg p-3 text-sm ${importResult.error ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
-                {importResult.error || importResult.message}
+            {importing && (
+              <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                <div className="w-5 h-5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+                Consultando API do INPI e importando patentes...
+              </div>
+            )}
+
+            {/* Error message — auto-dismisses after 3s */}
+            {importResult?.error && (
+              <div className="rounded-lg p-3 bg-red-50 text-red-700 border border-red-200 text-sm">
+                {importResult.error === true ? importResult.message : importResult.error}
+              </div>
+            )}
+
+            {/* Success with found patents table */}
+            {importResult && !importResult.error && importResult.found_patents?.length > 0 && (
+              <div className="space-y-3">
+                <div className="rounded-lg p-3 bg-green-50 text-green-700 border border-green-200 text-sm font-medium">
+                  {importResult.message}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">
+                    {importResult.total_found} patente(s) encontrada(s)
+                  </p>
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    <table className="w-full text-xs">
+                      <thead className="bg-muted/50 border-b border-border">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Pedido</th>
+                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground">Título</th>
+                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground hidden sm:table-cell">IPC</th>
+                          <th className="text-left px-3 py-2 font-semibold text-muted-foreground hidden md:table-cell">Depósito</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {importResult.found_patents.map((p, i) => (
+                          <tr key={i} className="hover:bg-muted/20">
+                            <td className="px-3 py-2 font-mono text-muted-foreground">{p.pedido || '-'}</td>
+                            <td className="px-3 py-2 line-clamp-2">{p.titulo}</td>
+                            <td className="px-3 py-2 text-muted-foreground hidden sm:table-cell">{p.ipc || '-'}</td>
+                            <td className="px-3 py-2 text-muted-foreground hidden md:table-cell">{p.deposito || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {importResult && !importResult.error && (!importResult.found_patents || importResult.found_patents.length === 0) && (
+              <div className="rounded-lg p-3 bg-amber-50 text-amber-700 border border-amber-200 text-sm">
+                {importResult.message || 'Nenhuma patente encontrada.'}
               </div>
             )}
 
             <div className="flex gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setShowInpiModal(false)} className="flex-1" disabled={importing}>
-                Cancelar
+                Fechar
               </Button>
               <Button type="submit" disabled={importing} className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold">
-                {importing ? 'Consultando INPI...' : 'Consultar e Importar'}
+                {importing ? 'Consultando...' : 'Consultar e Importar'}
               </Button>
             </div>
           </form>

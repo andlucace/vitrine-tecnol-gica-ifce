@@ -88,8 +88,17 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Build preview list for frontend display
+    const foundPatents = allProcessos.map(proc => ({
+      titulo: proc.titulo || 'Sem título',
+      pedido: proc.pedido || '',
+      ipc: proc.ipc || '',
+      deposito: proc.deposito || '',
+      status_inpi: proc.status || '',
+    }));
+
     if (allProcessos.length === 0) {
-      return Response.json({ imported: 0, skipped: 0, message: 'Nenhuma patente encontrada para esta consulta.' });
+      return Response.json({ imported: 0, skipped: 0, total_found: 0, found_patents: [], message: 'Nenhuma patente encontrada para esta consulta.' });
     }
 
     // Check existing patent numbers to avoid duplicates
@@ -130,6 +139,7 @@ Deno.serve(async (req) => {
       imported,
       skipped,
       total_found: allProcessos.length,
+      found_patents: foundPatents,
       message: `${imported} patentes importadas, ${skipped} já existentes (de ${allProcessos.length} encontradas).`,
     });
   } catch (error) {
